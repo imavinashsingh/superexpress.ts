@@ -3,6 +3,7 @@ import http from 'http'
 import { RouteDefinition } from './controller';
 import dotenv from 'dotenv';
 import MysqlSP, { spDefination } from './mysq_sp';
+import { logger } from './logger';
 dotenv.config()
 export default class Server {
   private app: Application;
@@ -15,7 +16,7 @@ export default class Server {
 
   public async run(): Promise<http.Server> {
     return this.app.listen(process.env.PORT, () => {
-      console.log(`The server is running on port ${process.env.PORT}`)
+      logger.info(`The server is running on port ${process.env.PORT}`)
     });
   };
 
@@ -25,21 +26,27 @@ export default class Server {
     });
   };
 
-  public loadEntity(controllers: any[]): void {
+  public async loadEntity(controllers: any[]): Promise<void> {
     for (let controller of controllers) {
       // This is our instantiated class
       const instance = new controller();
       const entities_controller: Array<spDefination> = Reflect.getMetadata('entity', controller);
       for (let e of entities_controller) {
-       const result: { createProcedure: string, query: string } = <{ createProcedure: string, query: string }>instance[e.sp_method_name]();
-        this.mysql_sp.drop_query(e.sp_method_name);
-        const proc = `CREATE PROCEDURE ${e.sp_method_name}(
+        const result: { createProcedure: string, query: string } = <{ createProcedure: string, query: string }>instance[e.sp_method_name]();
+        try {
+          await this.mysql_sp.drop_query(e.sp_method_name);
+          const proc = `CREATE PROCEDURE ${e.sp_method_name}(
               ${result.createProcedure}
             )
             BEGIN
                ${result.query}
             END`;
-        this.mysql_sp.connection_query(proc);
+          await this.mysql_sp.connection_query(proc);
+        } catch (error) {
+          logger.error(error)
+          throw new Error(error)
+        }
+
       }
     }
   }
@@ -53,9 +60,8 @@ export default class Server {
       // Our `routes` array containing all our routes for this controller
       const routes: Array<RouteDefinition> = Reflect.getMetadata('routes', controller);
       const mw: Array<(req: Request, res: Response, next: NextFunction) => void> = Reflect.getMetadata('mw', controller);
-      console.log("🚀 ~ file: server.ts ~ line 34 ~ Server ~ loadControllers ~ mw", mw)
-
-      this.app.use(prefix, mw);
+      if (mw.length)
+        this.app.use(prefix, mw);
       // Iterate over all routes and register them to our express application 
       routes.forEach(route => {
         //console.log("🚀 ~ file: index.ts ~ line 24 ~ route", route);
@@ -75,11 +81,11 @@ export default class Server {
             return instance[route.methodName](req, res);
           });
         else
-          if (route.mw)
-            this.app[route.requestMethod](prefix + route.path, route.mw, (req: Request, res: Response) => {
-              // Execute our method for this path and pass our express request and response object.
-              return instance[route.methodName](req, res);
-            });
+          this.app[route.requestMethod](prefix + route.path, (req: Request, res: Response) => {
+           // console.log("🚀 ~ file: server.ts ~ line 80 ~ Server ~ loadControllers ~ req", req)
+            // Execute our method for this path and pass our express request and response object.
+            return instance[route.methodName](req, res);
+          });
       });
     });
   };
