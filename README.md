@@ -2,7 +2,7 @@
 Project implements decorators for controller and mysql 
 
 ## Installation
-Use the [git cli](https://git-scm.com/downloads) to install and explore.
+Use the [git cli](https://git-scm.com/downloads) to clone repo and explore.
 ## Usage
 #### Controler/admin.ts
 ```
