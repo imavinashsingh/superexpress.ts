@@ -1,10 +1,10 @@
-# superexpress
-Project implements **lightweght** lib decorators for controller and mysql 
+# super express.js
+Project implements **lightweight** lib decorators for controller and MySQL 
 
 ## Installation
 Use the [git cli](https://git-scm.com/downloads) to clone repo and explore.
 ## Usage
-#### Controler/admin.ts
+#### Controller/admin.ts
 ```
 import { API, Get, Post } from "../core/controller";
 import { Request,Response } from "express";
@@ -37,7 +37,7 @@ export default class Admin {
 }
 ```
 
-#### Modal/admin.ts
+#### Model/admin.ts
 ```
 import { entity, query, queryResponse, sp, spResponse } from "../core/mysq_sp";
 
