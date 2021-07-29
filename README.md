@@ -1,6 +1,8 @@
 # superexpress
 Project implements decorators for controller and mysql 
 
+## Installation
+Use the [git cli](https://git-scm.com/downloads) to install and explore.
 ## Usage
 #### Controler/admin.ts
 ```
