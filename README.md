@@ -1,5 +1,5 @@
 # superexpress
-Project implements decorators for controller and mysql 
+Project implements **lightweght** lib decorators for controller and mysql 
 
 ## Installation
 Use the [git cli](https://git-scm.com/downloads) to clone repo and explore.
