@@ -1,4 +1,4 @@
-# super express.js
+# super express.ts
 Project implements **lightweight** lib decorators for controller and MySQL 
 
 ## Installation
